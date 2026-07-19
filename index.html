@@ -1,11 +1,447 @@
 <!DOCTYPE html>
+<!-- Final Day: a live matchday page for the tipmaster World Cup hub.
+     Single static file by design: no build step, no dependencies, nothing to break.
+     Facts hand-verified on the morning of the final; the page never invents a score. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deploy pipeline check</title>
+  <title>Final Day: Spain vs Argentina | World Cup 2026</title>
+  <meta name="description" content="Kickoff times in your zone, the road to the final, the Golden Boot race. One page for the World Cup 2026 final. Free, no app.">
+  <meta property="og:title" content="Final Day: Spain vs Argentina | World Cup 2026">
+  <meta property="og:description" content="Countdown, kickoff times, the Golden Boot race. Then put your tip on the slip.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://beeswaxpat.github.io/wc-final-day/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "FIFA World Cup 2026 Final: Spain vs Argentina",
+    "startDate": "2026-07-19T15:00:00-04:00",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "StadiumOrArena",
+      "name": "MetLife Stadium",
+      "address": { "@type": "PostalAddress", "addressLocality": "East Rutherford", "addressRegion": "NJ", "addressCountry": "US" }
+    },
+    "competitor": [
+      { "@type": "SportsTeam", "name": "Spain" },
+      { "@type": "SportsTeam", "name": "Argentina" }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --tm-primary: #ffcc33;
+      --tm-primary-light: #ffe066;
+      --tm-primary-dark: #e6b800;
+      --tm-secondary: #14532d;
+      --tm-secondary-light: #3d8a5c;
+      --tm-ink: #0f172a;
+      --tm-ink-deep: #0a0e1a;
+      --tm-success: #16a34a;
+      --tm-success-light: #dcfce7;
+      --tm-text: #111827;
+      --tm-text-muted: #6b7280;
+      --tm-border: #e5e7eb;
+      --tm-page: #f9fafb;
+      --tm-card-radius: 14px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--tm-page);
+      color: var(--tm-text);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 1020px; margin: 0 auto; padding: 0 20px; }
+
+    header {
+      background: var(--tm-ink-deep);
+      padding: 14px 0;
+    }
+    header .wrap { display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 36px; width: auto; display: block; }
+    .brand-label { color: #fff; font-weight: 800; letter-spacing: 0.08em; font-size: 13px; text-transform: uppercase; }
+    .brand-label span { color: var(--tm-primary); }
+    .lang-toggle {
+      background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff;
+      border-radius: 999px; padding: 6px 14px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .lang-toggle:hover { border-color: var(--tm-primary); color: var(--tm-primary); }
+
+    .hero {
+      background: var(--tm-ink);
+      background-image: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #14532d 130%);
+      color: #fff;
+      padding: 52px 0 56px;
+    }
+    .eyebrow {
+      color: var(--tm-secondary-light); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .hero h1 { font-size: clamp(34px, 6vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -0.01em; }
+    .hero .sub { margin-top: 14px; font-size: 17px; color: #cbd5e1; max-width: 560px; }
+
+    .live-badge {
+      display: none; margin-top: 22px; align-items: center; gap: 10px;
+      background: rgba(22,163,74,0.15); border: 1px solid var(--tm-success);
+      border-radius: 999px; padding: 10px 18px; width: fit-content; font-weight: 700;
+    }
+    .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tm-success); animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    .countdown { display: flex; gap: 14px; margin-top: 26px; }
+    .cd-cell {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--tm-card-radius); padding: 14px 0; text-align: center; min-width: 86px;
+    }
+    .cd-cell b { display: block; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .cd-cell small { color: #94a3b8; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .tz-row { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .tz-chip {
+      background: rgba(255,255,255,0.08); border-radius: 999px; padding: 6px 13px;
+      font-size: 13px; font-weight: 600; color: #e2e8f0;
+    }
+    .tz-chip.you { background: var(--tm-primary); color: var(--tm-ink); font-weight: 800; }
+
+    .cta-btn {
+      display: inline-block; margin-top: 30px; background: var(--tm-primary); color: #1f2937;
+      font-weight: 800; font-size: 16px; padding: 14px 30px; border-radius: 999px; text-decoration: none;
+    }
+    .cta-btn:hover { background: var(--tm-primary-light); }
+    .cta-note { margin-top: 10px; font-size: 13px; color: #94a3b8; }
+
+    section { padding: 44px 0 8px; }
+    .sec-title { font-size: 24px; font-weight: 800; margin-bottom: 18px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .card {
+      background: #fff; border: 1px solid var(--tm-border); border-radius: var(--tm-card-radius);
+      padding: 18px 20px;
+    }
+    .card .tag {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--tm-secondary); background: var(--tm-success-light); border-radius: 999px; padding: 3px 10px; margin-bottom: 10px;
+    }
+    .scoreline { font-size: 19px; font-weight: 800; }
+    .card .detail { margin-top: 6px; font-size: 14px; color: var(--tm-text-muted); }
+
+    .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .ics-btn {
+      display: inline-block; margin-top: 12px; background: var(--tm-ink); color: #fff; font-family: inherit;
+      font-weight: 700; font-size: 14px; padding: 10px 20px; border-radius: 999px; border: none; cursor: pointer;
+    }
+    .ics-btn:hover { background: #1e293b; }
+
+    .boot { background: #fff; border: 1px solid var(--tm-border); border-radius: var(--tm-card-radius); padding: 22px; }
+    .boot-row { margin-bottom: 16px; }
+    .boot-row .name { font-weight: 800; font-size: 15px; display: flex; justify-content: space-between; }
+    .boot-row .name small { color: var(--tm-text-muted); font-weight: 600; }
+    .bar-track { background: #f3f4f6; border-radius: 999px; height: 14px; margin-top: 6px; overflow: hidden; }
+    .bar { height: 100%; border-radius: 999px; }
+    .bar.mbappe { width: 100%; background: var(--tm-primary); }
+    .bar.messi { width: 80%; background: var(--tm-secondary-light); }
+    .boot-note { font-size: 14px; color: var(--tm-text-muted); margin-top: 6px; }
+
+    .stories { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .story { background: #fff; border: 1px solid var(--tm-border); border-left: 4px solid var(--tm-primary); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
+
+    .handoff {
+      display: none; background: var(--tm-success-light); border: 1px solid var(--tm-secondary-light);
+      border-radius: var(--tm-card-radius); padding: 18px 20px; margin-top: 18px; font-weight: 600;
+    }
+
+    footer { margin-top: 48px; padding: 26px 0 34px; border-top: 1px solid var(--tm-border); font-size: 13px; color: var(--tm-text-muted); }
+    footer a { color: var(--tm-secondary); }
+    .stamp { font-weight: 700; }
+
+    @media (max-width: 560px) {
+      .countdown { gap: 8px; }
+      .cd-cell { min-width: 0; flex: 1; }
+      .cd-cell b { font-size: 26px; }
+    }
+  </style>
 </head>
 <body>
-  <p>Pipeline check. Content coming shortly.</p>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <img src="https://tipmaster.net/img/tm-logo.png" alt="Tipmaster logo">
+      <div class="brand-label" data-i18n="brandLabel">Final <span>Day</span></div>
+    </div>
+    <button class="lang-toggle" id="langToggle" aria-label="Sprache wechseln">DE</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow" data-i18n="eyebrow">World Cup 2026 &middot; The Final &middot; MetLife Stadium</div>
+    <h1 data-i18n="h1">Spain vs Argentina</h1>
+    <p class="sub" data-i18n="heroSub">Two giants. One trophy. The last 90 minutes of the tournament, maybe a few more.</p>
+
+    <div class="live-badge" id="liveBadge">
+      <span class="live-dot"></span><span data-i18n="liveNow">The final is live now.</span>
+    </div>
+
+    <div class="countdown" id="countdown" aria-label="Countdown to kickoff">
+      <div class="cd-cell"><b id="cdH">--</b><small data-i18n="hrs">Hours</small></div>
+      <div class="cd-cell"><b id="cdM">--</b><small data-i18n="mins">Minutes</small></div>
+      <div class="cd-cell"><b id="cdS">--</b><small data-i18n="secs">Seconds</small></div>
+    </div>
+
+    <div class="tz-row">
+      <span class="tz-chip">New York 3:00 PM</span>
+      <span class="tz-chip">Deutschland 21:00</span>
+      <span class="tz-chip">London 20:00</span>
+      <span class="tz-chip">Los Angeles 12:00 PM</span>
+      <span class="tz-chip you" id="localTime"></span>
+    </div>
+
+    <a class="cta-btn" id="ctaBtn" href="https://tipmaster.net/world-cup/" data-i18n="cta">Call the final on Tipmaster</a>
+    <p class="cta-note" data-i18n="ctaNote">Free. No app. Your last slip of the tournament.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2 class="sec-title" data-i18n="matchTitle">Matchday details</h2>
+    <div class="match-grid">
+      <div class="card">
+        <span class="tag" data-i18n="kickoffTag">Kickoff</span>
+        <div class="scoreline" data-i18n="kickoffLine">Sun, Jul 19 &middot; 3:00 PM ET</div>
+        <div class="detail">MetLife Stadium, East Rutherford, NJ</div>
+        <button class="ics-btn" id="icsBtn" data-i18n="icsBtn">Add to calendar (.ics)</button>
+      </div>
+      <div class="card">
+        <span class="tag" data-i18n="watchTag">Where to watch (US)</span>
+        <div class="scoreline">FOX</div>
+        <div class="detail" data-i18n="watchDetail">English: FOX. Spanish: Telemundo and Peacock.</div>
+      </div>
+    </div>
+    <div class="handoff" id="handoff" data-i18n="handoff">The season never stops: the Bundesliga Tippspiel 2026/27 kicks off soon. Keep your streak alive on Tipmaster.</div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-i18n="roadTitle">The road to the final</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="tag" data-i18n="semi">Semifinal</span>
+        <div class="scoreline">Spain 2-0 France</div>
+        <div class="detail">Oyarzabal 22' (pen), Porro 58'</div>
+      </div>
+      <div class="card">
+        <span class="tag" data-i18n="semi">Semifinal</span>
+        <div class="scoreline">Argentina 2-1 England</div>
+        <div class="detail" data-i18n="semi2Detail">Gordon 55' / E. Fernandez 85', L. Martinez 90'+. Messi assisted both.</div>
+      </div>
+      <div class="card">
+        <span class="tag" data-i18n="third">Third place</span>
+        <div class="scoreline">England 6-4 France</div>
+        <div class="detail" data-i18n="thirdDetail">A 10-goal classic in Miami. England's best finish in 60 years.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-i18n="bootTitle">The Golden Boot race</h2>
+    <div class="boot">
+      <div class="boot-row">
+        <div class="name"><span>Kylian Mbapp&eacute; <small>&middot; France</small></span><span data-i18n="mbappeStat">10 goals, 3 assists</span></div>
+        <div class="bar-track"><div class="bar mbappe"></div></div>
+        <div class="boot-note" data-i18n="mbappeNote">Tournament over. 22 career World Cup goals, the all-time record.</div>
+      </div>
+      <div class="boot-row">
+        <div class="name"><span>Lionel Messi <small>&middot; Argentina</small></span><span data-i18n="messiStat">8 goals, 4 assists</span></div>
+        <div class="bar-track"><div class="bar messi"></div></div>
+        <div class="boot-note" data-i18n="messiNote">Plays today. 2 goals take the Boot on assists. 3 take it outright.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-i18n="storiesTitle">What's on the line</h2>
+    <div class="stories">
+      <div class="story" data-i18n="story1">Messi's last dance: one match left in the biggest career the game has seen.</div>
+      <div class="story" data-i18n="story2">Argentina chase back-to-back titles: the first repeat since Brazil 1962.</div>
+      <div class="story" data-i18n="story3">Spain arrive 37 matches unbeaten.</div>
+      <div class="story" data-i18n="story4">Whatever happens, Mbapp&eacute; leaves with the all-time World Cup goals record: 22.</div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="stamp" data-i18n="stamp">Facts hand-verified as of Sun, Jul 19, 2026, 9:15 AM ET. No live data feed: this page never invents a score.</p>
+    <p style="margin-top:8px" data-i18n="disclaimer">Unofficial fan page, built as a product demo for <a href="https://tipmaster.net">tipmaster.net</a>. Not affiliated with FIFA.</p>
+  </footer>
+
+</div>
+
+<script>
+  var KICKOFF = Date.parse('2026-07-19T19:00:00Z');
+  var FULLTIME = Date.parse('2026-07-19T21:45:00Z');
+
+  var i18n = {
+    en: {
+      brandLabel: 'Final <span>Day</span>',
+      eyebrow: 'World Cup 2026 &middot; The Final &middot; MetLife Stadium',
+      h1: 'Spain vs Argentina',
+      heroSub: 'Two giants. One trophy. The last 90 minutes of the tournament, maybe a few more.',
+      liveNow: 'The final is live now.',
+      hrs: 'Hours', mins: 'Minutes', secs: 'Seconds',
+      cta: 'Call the final on Tipmaster',
+      ctaNote: 'Free. No app. Your last slip of the tournament.',
+      matchTitle: 'Matchday details',
+      kickoffTag: 'Kickoff',
+      kickoffLine: 'Sun, Jul 19 &middot; 3:00 PM ET',
+      watchTag: 'Where to watch (US)',
+      watchDetail: 'English: FOX. Spanish: Telemundo and Peacock.',
+      icsBtn: 'Add to calendar (.ics)',
+      handoff: 'The season never stops: the Bundesliga Tippspiel 2026/27 kicks off soon. Keep your streak alive on Tipmaster.',
+      roadTitle: 'The road to the final',
+      semi: 'Semifinal', third: 'Third place',
+      semi2Detail: "Gordon 55' / E. Fernandez 85', L. Martinez 90'+. Messi assisted both.",
+      thirdDetail: "A 10-goal classic in Miami. England's best finish in 60 years.",
+      bootTitle: 'The Golden Boot race',
+      mbappeStat: '10 goals, 3 assists',
+      mbappeNote: 'Tournament over. 22 career World Cup goals, the all-time record.',
+      messiStat: '8 goals, 4 assists',
+      messiNote: '2 goals today take the Boot on assists. 3 take it outright.',
+      storiesTitle: "What's on the line",
+      story1: "Messi's last dance: one match left in the biggest career the game has seen.",
+      story2: 'Argentina chase back-to-back titles: the first repeat since Brazil 1962.',
+      story3: 'Spain arrive 37 matches unbeaten.',
+      story4: 'Whatever happens, Mbapp&eacute; leaves with the all-time World Cup goals record: 22.',
+      stamp: 'Facts hand-verified as of Sun, Jul 19, 2026, 9:15 AM ET. No live data feed: this page never invents a score.',
+      disclaimer: 'Unofficial fan page, built as a product demo for <a href="https://tipmaster.net">tipmaster.net</a>. Not affiliated with FIFA.',
+      postSub: 'Full time. The 2026 World Cup is decided.'
+    },
+    de: {
+      brandLabel: 'Final <span>Day</span>',
+      eyebrow: 'WM 2026 &middot; Das Finale &middot; MetLife Stadium',
+      h1: 'Spanien gegen Argentinien',
+      heroSub: 'Zwei Giganten. Ein Pokal. Die letzten 90 Minuten des Turniers, vielleicht ein paar mehr.',
+      liveNow: 'Das Finale l&auml;uft jetzt.',
+      hrs: 'Std.', mins: 'Min.', secs: 'Sek.',
+      cta: 'Tippe das Finale auf Tipmaster',
+      ctaNote: 'Kostenlos. Keine App. Dein letzter Tippschein des Turniers.',
+      matchTitle: 'Spieltag-Infos',
+      kickoffTag: 'Ansto&szlig;',
+      kickoffLine: 'So., 19. Juli &middot; 21:00 Uhr (MESZ)',
+      watchTag: '&Uuml;bertragung (USA)',
+      watchDetail: 'Englisch: FOX. Spanisch: Telemundo und Peacock.',
+      icsBtn: 'In den Kalender (.ics)',
+      handoff: 'Die Saison endet nie: Das Bundesliga-Tippspiel 2026/27 startet bald. Halte deine Serie auf Tipmaster am Leben.',
+      roadTitle: 'Der Weg ins Finale',
+      semi: 'Halbfinale', third: 'Spiel um Platz 3',
+      semi2Detail: "Gordon 55' / E. Fernandez 85', L. Martinez 90'+. Beide Tore von Messi vorbereitet.",
+      thirdDetail: 'Ein Klassiker mit 10 Toren in Miami. Englands bestes Ergebnis seit 60 Jahren.',
+      bootTitle: 'Das Rennen um den Goldenen Schuh',
+      mbappeStat: '10 Tore, 3 Vorlagen',
+      mbappeNote: 'Turnier beendet. 22 WM-Tore insgesamt, Allzeitrekord.',
+      messiStat: '8 Tore, 4 Vorlagen',
+      messiNote: '2 Tore heute holen den Schuh &uuml;ber die Vorlagen. 3 machen es eindeutig.',
+      storiesTitle: 'Darum geht es heute',
+      story1: 'Messis letzter Tanz: ein Spiel bleibt in der gr&ouml;&szlig;ten Karriere des Fu&szlig;balls.',
+      story2: 'Argentinien jagt die Titelverteidigung: die erste seit Brasilien 1962.',
+      story3: 'Spanien kommt mit 37 Spielen ohne Niederlage.',
+      story4: 'Wie es auch ausgeht: Mbapp&eacute; geht mit dem WM-Torrekord, 22 Treffer.',
+      stamp: 'Fakten von Hand gepr&uuml;ft: So., 19. Juli 2026, 15:15 Uhr MESZ. Kein Live-Datenfeed: Diese Seite erfindet keine Ergebnisse.',
+      disclaimer: 'Inoffizielle Fanseite, gebaut als Produkt-Demo f&uuml;r <a href="https://tipmaster.net">tipmaster.net</a>. Nicht mit der FIFA verbunden.',
+      postSub: 'Abpfiff. Die WM 2026 ist entschieden.'
+    }
+  };
+
+  var lang = 'en';
+  function applyLang() {
+    document.documentElement.lang = lang;
+    var dict = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (dict[key]) el.innerHTML = dict[key];
+    });
+    document.getElementById('langToggle').textContent = lang === 'en' ? 'DE' : 'EN';
+    renderPhase();
+  }
+  document.getElementById('langToggle').addEventListener('click', function () {
+    lang = lang === 'en' ? 'de' : 'en';
+    applyLang();
+  });
+
+  // Phase: pre / live / post, from the clock. ?phase= override exists for review only.
+  function currentPhase() {
+    var q = new URLSearchParams(location.search).get('phase');
+    if (q === 'pre' || q === 'live' || q === 'post') return q;
+    var now = Date.now();
+    if (now < KICKOFF) return 'pre';
+    if (now < FULLTIME) return 'live';
+    return 'post';
+  }
+
+  function renderPhase() {
+    var phase = currentPhase();
+    var cd = document.getElementById('countdown');
+    var badge = document.getElementById('liveBadge');
+    var handoff = document.getElementById('handoff');
+    var sub = document.querySelector('.sub');
+    cd.style.display = phase === 'pre' ? 'flex' : 'none';
+    badge.style.display = phase === 'live' ? 'flex' : 'none';
+    handoff.style.display = phase === 'post' ? 'block' : 'none';
+    if (phase === 'post') sub.innerHTML = i18n[lang].postSub;
+    else sub.innerHTML = i18n[lang].heroSub;
+  }
+
+  function tick() {
+    var ms = KICKOFF - Date.now();
+    if (ms < 0) ms = 0;
+    var h = Math.floor(ms / 3600000);
+    var m = Math.floor(ms / 60000) % 60;
+    var s = Math.floor(ms / 1000) % 60;
+    document.getElementById('cdH').textContent = String(h).padStart(2, '0');
+    document.getElementById('cdM').textContent = String(m).padStart(2, '0');
+    document.getElementById('cdS').textContent = String(s).padStart(2, '0');
+    renderPhase();
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  // Kickoff in the visitor's own timezone.
+  try {
+    var local = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(new Date(KICKOFF));
+    var zone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    document.getElementById('localTime').textContent = (zone ? zone.split('/').pop().replace(/_/g, ' ') : 'You') + ' ' + local;
+  } catch (e) {
+    document.getElementById('localTime').style.display = 'none';
+  }
+
+  // Calendar export, generated in the browser. No server involved.
+  document.getElementById('icsBtn').addEventListener('click', function () {
+    var ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Final Day demo//EN',
+      'BEGIN:VEVENT',
+      'UID:wc2026-final@final-day-demo',
+      'DTSTAMP:20260719T130000Z',
+      'DTSTART:20260719T190000Z',
+      'DTEND:20260719T213000Z',
+      'SUMMARY:World Cup 2026 Final: Spain vs Argentina',
+      'LOCATION:MetLife Stadium\\, East Rutherford\\, NJ',
+      'DESCRIPTION:Kickoff 3:00 PM ET / 21:00 CEST. Get your tip in before kickoff: https://tipmaster.net/world-cup/',
+      'END:VEVENT', 'END:VCALENDAR'
+    ].join('\r\n');
+    var blob = new Blob([ics], { type: 'text/calendar' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'world-cup-2026-final.ics';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  applyLang();
+</script>
 </body>
 </html>
