@@ -414,7 +414,12 @@
   try {
     var local = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(new Date(KICKOFF));
     var zone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    document.getElementById('localTime').textContent = (zone ? zone.split('/').pop().replace(/_/g, ' ') : 'You') + ' ' + local;
+    var label = (zone ? zone.split('/').pop().replace(/_/g, ' ') : 'You') + ' ' + local;
+    var dupe = Array.prototype.some.call(document.querySelectorAll('.tz-chip:not(.you)'), function (c) {
+      return c.textContent === label;
+    });
+    if (dupe) document.getElementById('localTime').style.display = 'none';
+    else document.getElementById('localTime').textContent = label;
   } catch (e) {
     document.getElementById('localTime').style.display = 'none';
   }
