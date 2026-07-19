@@ -151,6 +151,23 @@
     .stories { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
     .story { background: #fff; border: 1px solid var(--tm-border); border-left: 4px solid var(--tm-primary); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
 
+    .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 36px; align-items: center; }
+    .hero-art { width: 250px; }
+    .hero-art svg { width: 100%; height: auto; display: block; }
+    @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } .hero-art { display: none; } }
+
+    .match-table { background: #fff; border: 1px solid var(--tm-border); border-radius: var(--tm-card-radius); padding: 6px 20px; }
+    .match-block { padding: 16px 0; }
+    .match-block + .match-block { border-top: 1px solid var(--tm-border); }
+    .m-tagrow { text-align: center; }
+    .m-line { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+    .m-team { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .m-team.home { justify-content: flex-end; text-align: right; }
+    .m-score { background: var(--tm-ink); color: #fff; font-weight: 800; font-size: 20px; padding: 4px 14px; border-radius: 8px; font-variant-numeric: tabular-nums; }
+    .m-detail { text-align: center; font-size: 13px; color: var(--tm-text-muted); margin-top: 8px; }
+    .flag { width: 22px; height: 16px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); flex-shrink: 0; }
+    @media (max-width: 560px) { .m-team { font-size: 14px; } .m-score { font-size: 17px; padding: 3px 10px; } }
+
     .handoff {
       display: none; background: var(--tm-success-light); border: 1px solid var(--tm-secondary-light);
       border-radius: var(--tm-card-radius); padding: 18px 20px; margin-top: 18px; font-weight: 600;
@@ -169,6 +186,13 @@
 </head>
 <body>
 
+<svg style="display:none" aria-hidden="true"><defs>
+  <symbol id="flag-es" viewBox="0 0 22 16"><rect width="22" height="16" fill="#c60b1e"/><rect y="4" width="22" height="8" fill="#ffc400"/></symbol>
+  <symbol id="flag-fr" viewBox="0 0 22 16"><rect width="22" height="16" fill="#fff"/><rect width="7.33" height="16" fill="#0055a4"/><rect x="14.67" width="7.33" height="16" fill="#ef4135"/></symbol>
+  <symbol id="flag-ar" viewBox="0 0 22 16"><rect width="22" height="16" fill="#74acdf"/><rect y="5.33" width="22" height="5.34" fill="#fff"/><circle cx="11" cy="8" r="1.8" fill="#f6b40e"/></symbol>
+  <symbol id="flag-en" viewBox="0 0 22 16"><rect width="22" height="16" fill="#fff"/><rect x="9" width="4" height="16" fill="#ce1124"/><rect y="6" width="22" height="4" fill="#ce1124"/></symbol>
+</defs></svg>
+
 <header>
   <div class="wrap">
     <div class="brand">
@@ -181,6 +205,7 @@
 
 <div class="hero">
   <div class="wrap">
+  <div class="hero-copy">
     <div class="eyebrow" data-i18n="eyebrow">World Cup 2026 &middot; The Final &middot; MetLife Stadium</div>
     <h1 data-i18n="h1">Spain vs Argentina</h1>
     <p class="sub" data-i18n="heroSub">Two giants. One trophy. The last 90 minutes of the tournament, maybe a few more.</p>
@@ -197,7 +222,7 @@
 
     <div class="tz-row">
       <span class="tz-chip">New York 3:00 PM</span>
-      <span class="tz-chip">Deutschland 21:00</span>
+      <span class="tz-chip" data-i18n="tzDe">Germany 21:00</span>
       <span class="tz-chip">London 20:00</span>
       <span class="tz-chip">Los Angeles 12:00 PM</span>
       <span class="tz-chip you" id="localTime"></span>
@@ -205,6 +230,35 @@
 
     <a class="cta-btn" id="ctaBtn" href="https://tipmaster.net/world-cup/" data-i18n="cta">Call the final on Tipmaster</a>
     <p class="cta-note" data-i18n="ctaNote">Free. No app. Your last slip of the tournament.</p>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 260 300">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stop-color="rgba(255,204,51,0.20)"/>
+          <stop offset="70%" stop-color="rgba(255,204,51,0.05)"/>
+          <stop offset="100%" stop-color="rgba(255,204,51,0)"/>
+        </radialGradient>
+        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffe066"/>
+          <stop offset="55%" stop-color="#ffcc33"/>
+          <stop offset="100%" stop-color="#e6b800"/>
+        </linearGradient>
+      </defs>
+      <circle cx="130" cy="130" r="128" fill="url(#glow)"/>
+      <circle cx="130" cy="130" r="98" fill="none" stroke="rgba(255,255,255,0.07)"/>
+      <circle cx="130" cy="86" r="40" fill="url(#gold)"/>
+      <ellipse cx="130" cy="86" rx="40" ry="13" fill="none" stroke="#b38f00" stroke-opacity="0.55"/>
+      <ellipse cx="130" cy="86" rx="17" ry="40" fill="none" stroke="#b38f00" stroke-opacity="0.55"/>
+      <path d="M98,118 C92,150 104,170 100,205 L160,205 C156,170 168,150 162,118 C150,131 110,131 98,118 Z" fill="url(#gold)"/>
+      <rect x="88" y="205" width="84" height="14" rx="4" fill="#0f3d21"/>
+      <rect x="76" y="221" width="108" height="24" rx="8" fill="#14532d"/>
+      <rect x="100" y="228" width="60" height="10" rx="3" fill="rgba(255,204,51,0.35)"/>
+      <use href="#flag-es" x="72" y="262" width="30" height="22"/>
+      <text x="130" y="279" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="800" font-family="inherit">VS</text>
+      <use href="#flag-ar" x="158" y="262" width="30" height="22"/>
+    </svg>
+  </div>
   </div>
 </div>
 
@@ -230,21 +284,33 @@
 
   <section>
     <h2 class="sec-title" data-i18n="roadTitle">The road to the final</h2>
-    <div class="cards">
-      <div class="card">
-        <span class="tag" data-i18n="semi">Semifinal</span>
-        <div class="scoreline">Spain 2-0 France</div>
-        <div class="detail">Oyarzabal 22' (pen), Porro 58'</div>
+    <div class="match-table">
+      <div class="match-block">
+        <div class="m-tagrow"><span class="tag" data-i18n="semi">Semifinal</span></div>
+        <div class="m-line">
+          <span class="m-team home"><span data-i18n="teamES">Spain</span><svg class="flag"><use href="#flag-es"/></svg></span>
+          <span class="m-score">2:0</span>
+          <span class="m-team"><svg class="flag"><use href="#flag-fr"/></svg><span data-i18n="teamFR">France</span></span>
+        </div>
+        <div class="m-detail">Oyarzabal 22' (pen), Porro 58'</div>
       </div>
-      <div class="card">
-        <span class="tag" data-i18n="semi">Semifinal</span>
-        <div class="scoreline">Argentina 2-1 England</div>
-        <div class="detail" data-i18n="semi2Detail">Gordon 55' / E. Fernandez 85', L. Martinez 90'+. Messi assisted both.</div>
+      <div class="match-block">
+        <div class="m-tagrow"><span class="tag" data-i18n="semi">Semifinal</span></div>
+        <div class="m-line">
+          <span class="m-team home"><span data-i18n="teamAR">Argentina</span><svg class="flag"><use href="#flag-ar"/></svg></span>
+          <span class="m-score">2:1</span>
+          <span class="m-team"><svg class="flag"><use href="#flag-en"/></svg><span data-i18n="teamEN">England</span></span>
+        </div>
+        <div class="m-detail" data-i18n="semi2Detail">Gordon 55' / E. Fernandez 85', L. Martinez 90'+. Messi assisted both.</div>
       </div>
-      <div class="card">
-        <span class="tag" data-i18n="third">Third place</span>
-        <div class="scoreline">England 6-4 France</div>
-        <div class="detail" data-i18n="thirdDetail">A 10-goal classic in Miami. England's best finish in 60 years.</div>
+      <div class="match-block">
+        <div class="m-tagrow"><span class="tag" data-i18n="third">Third place</span></div>
+        <div class="m-line">
+          <span class="m-team home"><span data-i18n="teamEN">England</span><svg class="flag"><use href="#flag-en"/></svg></span>
+          <span class="m-score">6:4</span>
+          <span class="m-team"><svg class="flag"><use href="#flag-fr"/></svg><span data-i18n="teamFR">France</span></span>
+        </div>
+        <div class="m-detail" data-i18n="thirdDetail">A 10-goal classic in Miami. England's best finish in 60 years.</div>
       </div>
     </div>
   </section>
@@ -271,7 +337,7 @@
       <div class="story" data-i18n="story1">Messi's last dance: one match left in the biggest career the game has seen.</div>
       <div class="story" data-i18n="story2">Argentina chase back-to-back titles: the first repeat since Brazil 1962.</div>
       <div class="story" data-i18n="story3">Spain arrive 37 matches unbeaten.</div>
-      <div class="story" data-i18n="story4">Whatever happens, Mbapp&eacute; leaves with the all-time World Cup goals record: 22.</div>
+      <div class="story" data-i18n="story4">Mbapp&eacute; tops the all-time World Cup scoring list on 22. Messi sits on 21, with one match left to catch him.</div>
     </div>
   </section>
 
@@ -294,6 +360,8 @@
       heroSub: 'Two giants. One trophy. The last 90 minutes of the tournament, maybe a few more.',
       liveNow: 'The final is live now.',
       hrs: 'Hours', mins: 'Minutes', secs: 'Seconds',
+      tzDe: 'Germany 21:00',
+      teamES: 'Spain', teamFR: 'France', teamAR: 'Argentina', teamEN: 'England',
       cta: 'Call the final on Tipmaster',
       ctaNote: 'Free. No app. Your last slip of the tournament.',
       matchTitle: 'Matchday details',
@@ -316,7 +384,7 @@
       story1: "Messi's last dance: one match left in the biggest career the game has seen.",
       story2: 'Argentina chase back-to-back titles: the first repeat since Brazil 1962.',
       story3: 'Spain arrive 37 matches unbeaten.',
-      story4: 'Whatever happens, Mbapp&eacute; leaves with the all-time World Cup goals record: 22.',
+      story4: 'Mbapp&eacute; tops the all-time World Cup scoring list on 22. Messi sits on 21, with one match left to catch him.',
       stamp: 'Facts hand-verified as of Sun, Jul 19, 2026, 9:15 AM ET. No live data feed: this page never invents a score.',
       disclaimer: 'Unofficial fan page, built as a product demo for <a href="https://tipmaster.net">tipmaster.net</a>. Not affiliated with FIFA.',
       postSub: 'Full time. The 2026 World Cup is decided.'
@@ -328,6 +396,8 @@
       heroSub: 'Zwei Giganten. Ein Pokal. Die letzten 90 Minuten des Turniers, vielleicht ein paar mehr.',
       liveNow: 'Das Finale l&auml;uft jetzt.',
       hrs: 'Std.', mins: 'Min.', secs: 'Sek.',
+      tzDe: 'Deutschland 21:00',
+      teamES: 'Spanien', teamFR: 'Frankreich', teamAR: 'Argentinien', teamEN: 'England',
       cta: 'Tippe das Finale auf Tipmaster',
       ctaNote: 'Kostenlos. Keine App. Dein letzter Tippschein des Turniers.',
       matchTitle: 'Spieltag-Infos',
@@ -350,7 +420,7 @@
       story1: 'Messis letzter Tanz: ein Spiel bleibt in der gr&ouml;&szlig;ten Karriere des Fu&szlig;balls.',
       story2: 'Argentinien jagt die Titelverteidigung: die erste seit Brasilien 1962.',
       story3: 'Spanien kommt mit 37 Spielen ohne Niederlage.',
-      story4: 'Wie es auch ausgeht: Mbapp&eacute; geht mit dem WM-Torrekord, 22 Treffer.',
+      story4: 'Mbapp&eacute; f&uuml;hrt die ewige WM-Torsch&uuml;tzenliste mit 22 Treffern an. Messi steht bei 21, ein Spiel bleibt.',
       stamp: 'Fakten von Hand gepr&uuml;ft: So., 19. Juli 2026, 15:15 Uhr MESZ. Kein Live-Datenfeed: Diese Seite erfindet keine Ergebnisse.',
       disclaimer: 'Inoffizielle Fanseite, gebaut als Produkt-Demo f&uuml;r <a href="https://tipmaster.net">tipmaster.net</a>. Nicht mit der FIFA verbunden.',
       postSub: 'Abpfiff. Die WM 2026 ist entschieden.'
